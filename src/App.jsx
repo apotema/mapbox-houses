@@ -1,8 +1,10 @@
+import { MapComponent } from "./components/MapComponent"
+
 function App() {
 
   return (
     <>
-      <h1>Mapbox House</h1>
+      <MapComponent />
     </>
   )
 }
