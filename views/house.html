@@ -48,7 +48,7 @@ body { margin: 0; padding: 0; }
         /* Since the 3D model is in real world meters, a scale transform needs to be
          * applied since the CustomLayerInterface expects units in MercatorCoordinates.
          */
-        scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits()
+        scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits()/50
     };
 
     const THREE = window.THREE;
