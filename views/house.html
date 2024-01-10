@@ -74,7 +74,7 @@ body { margin: 0; padding: 0; }
             // use the three.js GLTF loader to add the 3D model to the three.js scene
             const loader = new THREE.GLTFLoader();
             loader.load(
-                'https://docs.mapbox.com/mapbox-gl-js/assets/metlife-building.gltf',
+                'http://localhost:8080/house1/scene.gltf',
                 (gltf) => {
                     this.scene.add(gltf.scene);
                 }
