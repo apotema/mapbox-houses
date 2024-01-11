@@ -9,12 +9,19 @@
   ## Installation
   1. Open a terminal and navigate to the project's root directory.
   2. Run the following command to use the recommended Node.js version:
-    nvm use
+    ```
+      nvm use
+    ```
   If the recommended version is not installed, run:
-    nvm install <version>
-  3. Install project dependencies using:
-    npm install
-  
+     ```
+       nvm install <version>
+    ```
+  4. Install project dependencies using:
+      ```
+        npm install
+     ```  
   ## Running Locally
   After completing the installation, you can run the project locally using:
-    npm run dev
+      ```
+        npm run dev
+      ```  
