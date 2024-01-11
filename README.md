@@ -15,11 +15,11 @@
   If the recommended version is not installed, run:
      ```
        nvm install <version>
-    ```
+     ```
   4. Install project dependencies using:
       ```
         npm install
-     ```  
+      ```  
   ## Running Locally
   After completing the installation, you can run the project locally using:
       ```
