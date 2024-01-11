@@ -14,7 +14,7 @@ export function MapComponent() {
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v11',
+      style: 'mapbox://styles/mapbox/outdoors-v12',
       center: [longitude, latitude],
       zoom: 16,
       pitch: 60,
@@ -40,21 +40,30 @@ export function MapComponent() {
       scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits() / 50,
     };
 
+    function makeScene() {
+      const scene = new THREE.Scene();
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff);
+        directionalLight.position.set(0, 70, 100).normalize();
+        scene.add(directionalLight);
+
+        const directionalLight2 = new THREE.DirectionalLight(0xffffff);
+        directionalLight2.position.set(0, -70, 100).normalize();
+        scene.add(directionalLight2);
+
+        const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+        scene.add(ambientLight);
+
+        return scene
+    }
+
     const customLayer = {
       id: '3d-model',
       type: 'custom',
       renderingMode: '3d',
       onAdd: function (map, gl) {
         this.camera = new THREE.Camera();
-        this.scene = new THREE.Scene();
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff);
-        directionalLight.position.set(0, 70, 100).normalize();
-        this.scene.add(directionalLight);
-
-        const directionalLight2 = new THREE.DirectionalLight(0xffffff);
-        directionalLight2.position.set(0, -70, 100).normalize();
-        this.scene.add(directionalLight2);
+        this.scene = makeScene();
 
         const loader = new GLTFLoader();
         loader.load(
@@ -63,7 +72,7 @@ export function MapComponent() {
             this.scene.add(gltf.scene);
           }
         );
-        this.map = map;
+        this.map = map;      
 
         this.renderer = new THREE.WebGLRenderer({
           canvas: map.getCanvas(),
