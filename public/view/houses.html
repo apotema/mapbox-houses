@@ -17,6 +17,28 @@ body { margin: 0; padding: 0; }
 <div id="map"></div>
 <script>
 	mapboxgl.accessToken = 'pk.eyJ1IjoiYXBvdGVtYSIsImEiOiJjbHI2cno4d2EwbDB1MmtwYnIwYXU0MjNiIn0.5d7oX_9xfS2lcqUHWx7_AA';
+    // coordinates = [
+    //     {lng: -87.701056, lat: 34.797902, rot: 0}, {lng: -87.701456, lat: 34.797902, rot: 0}, {lng: -87.701856, lat: 34.797902, rot: 0}
+    // ]
+    const coordinates = getCoordinates(100)
+    function getCoordinates(limit) {
+        coordList = []
+        var lng = -87.701056
+        var lat = 34.797902
+        var rot = 0
+
+        for (var i = 0; i < limit; i += 1){
+            lng = lng - 0.0004
+            coordList.push({lng: lng, lat: lat, rot: rot})
+
+            // if (i = 10){
+            //     var lng = -87.701056
+            //     var lat = 34.797902
+            //     var rot = 180
+            // }
+        }
+        return coordList
+    }
     const map = new mapboxgl.Map({
         container: 'map',
         // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
@@ -43,7 +65,7 @@ body { margin: 0; padding: 0; }
             type: 'custom',
             renderingMode: '3d',
             onAdd: function () {
-                const scale = 1/50;
+                const scale = 1/80;
                 const options = {
                     obj: 'http://mapbox-houses.onrender.com/houses/house1/scene.gltf',
                     type: 'gltf',
@@ -52,22 +74,12 @@ body { margin: 0; padding: 0; }
                     rotation: { x: 90, y: -90, z: 0 }
                 };
 
-                // tb.loadObj(options, (model) => {
-                //     model.setCoords([-87.701056, 34.794222]);
-                //     model.setRotation({ x: 0, y: 0, z: 241 });
-                //     tb.add(model);
-                // });
-                // tb.loadObj(options, (model) => {
-                //     model.setCoords([-87.702156, 34.794222]);
-                //     model.setRotation({ x: 0, y: 0, z: 241 });
-                //     tb.add(model);
-                // });
-                coordinates = [{lng: -87.701056, lat: 34.794222}, {lng: -87.702156, lat: 34.794222}]
+
 
                 for (const coordinate of coordinates) {
                     tb.loadObj(options, (model) => {
                     model.setCoords([coordinate.lng, coordinate.lat]);
-                    model.setRotation({ x: 0, y: 0, z: 241 });
+                    model.setRotation({ x: 0, y: 0, z: coordinate.rot });
                     tb.add(model);
                 });
                 }
