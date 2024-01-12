@@ -20,22 +20,29 @@ body { margin: 0; padding: 0; }
     // coordinates = [
     //     {lng: -87.701056, lat: 34.797902, rot: 0}, {lng: -87.701456, lat: 34.797902, rot: 0}, {lng: -87.701856, lat: 34.797902, rot: 0}
     // ]
-    const coordinates = getCoordinates(100)
+    const coordinates = getCoordinates(501)
     function getCoordinates(limit) {
         coordList = []
-        var lng = -87.701056
+        var lngOrigin = -87.69956
+        var lng = lngOrigin
         var lat = 34.797902
         var rot = 0
 
-        for (var i = 0; i < limit; i += 1){
-            lng = lng - 0.0004
+        for (var i = 1; i < limit; i += 1){
+            lng = lng - 0.0003
             coordList.push({lng: lng, lat: lat, rot: rot})
 
-            // if (i = 10){
-            //     var lng = -87.701056
-            //     var lat = 34.797902
-            //     var rot = 180
-            // }
+            if (i % 20 == 0){
+                if (i % 40 == 0){
+                    lng = lngOrigin
+                    lat = lat - 0.0004
+                    rot = 0
+                } else {
+                    lng = lngOrigin + 0.000299
+                    lat = lat - 0.0001
+                    rot = 180
+                } 
+            }
         }
         return coordList
     }
@@ -44,7 +51,7 @@ body { margin: 0; padding: 0; }
         // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
         style: 'mapbox://styles/mapbox/outdoors-v12',
         center: { lng: -87.701176, lat: 34.794222 },
-        zoom: 16,
+        zoom: 15.5,
         pitch: 60,
         bearing: 0,
         antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
@@ -65,7 +72,7 @@ body { margin: 0; padding: 0; }
             type: 'custom',
             renderingMode: '3d',
             onAdd: function () {
-                const scale = 1/80;
+                const scale = 1/100;
                 const options = {
                     obj: 'http://mapbox-houses.onrender.com/houses/house1/scene.gltf',
                     type: 'gltf',
