@@ -32,32 +32,11 @@ function getCoordinates(limit) {
 }
 
 function makeMap(container) {
-  const scene = new THREE.Scene();
-
-  const directionalLight = new THREE.DirectionalLight(0xffffff);
-    directionalLight.position.set(0, 70, 100).normalize();
-    scene.add(directionalLight);
-
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff);
-    directionalLight2.position.set(0, -70, 100).normalize();
-    scene.add(directionalLight2);
-
-    const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
-    scene.add(ambientLight);
-
-    return scene
-}
-
-export function MapComponent() {
-  const mapContainer = useRef(null);
-  const coordinates = getCoordinates(501)
-
-  useEffect(() => {
-    const longitude = -87.701176;
+  const longitude = -87.701176;
     const latitude = 34.794222;
 
     var map = new mapboxgl.Map({
-      container: mapContainer.current,
+      container: container.current,
       // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
       style: 'mapbox://styles/mapbox/outdoors-v12',
       center: { lng: longitude, lat: latitude },
@@ -65,184 +44,70 @@ export function MapComponent() {
       pitch: 60,
       bearing: 0,
       antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
-  });
+  })
 
-  const tb = (window.tb = new Threebox(
+    return map
+}
+
+function makeThreeBox(map){
+  return(window.tb = new Threebox(
     map,
     map.getCanvas().getContext('webgl'),
     {
         defaultLights: true
     }
-  ));
+  ))
+}
 
-  map.on('style.load', () => {
-    map.addLayer({
+function addMultipleModel(modelOptions, quantity){
+  const coordinatesList = getCoordinates(quantity)
+
+  for (const modelCoordinates of coordinatesList) {
+    addSingleModel(modelOptions, modelCoordinates)
+  }
+}
+
+function addSingleModel(modelOptions, coordinates){
+  tb.loadObj(modelOptions, (model) => {
+    model.setCoords([coordinates.lng, coordinates.lat]);
+    model.setRotation({ x: 0, y: 0, z: coordinates.rot });
+    tb.add(model)
+  })
+}
+
+function getModelOptions(){
+  const scale= 1/100
+  const options = {
+    obj: 'https://mapbox-houses.onrender.com/houses/house1/scene.gltf',
+    type: 'gltf',
+    scale: { x: scale, y: scale, z: scale },
+    units: 'meters',
+    rotation: { x: 90, y: -90, z: 0 }
+}
+  return options
+}
+
+export function MapComponent() {
+  const mapContainer = useRef(null);
+
+  useEffect(() => {
+    const map = makeMap(mapContainer)
+    const tb = makeThreeBox(map);
+
+    map.on('style.load', () => {
+      map.addLayer({
         id: 'custom-threebox-model',
         type: 'custom',
         renderingMode: '3d',
         onAdd: function () {
-            const scale = 1/100;
-            const options = {
-                obj: 'https://mapbox-houses.onrender.com/houses/house1/scene.gltf',
-                type: 'gltf',
-                scale: { x: scale, y: scale, z: scale },
-                units: 'meters',
-                rotation: { x: 90, y: -90, z: 0 }
-            };
-
-
-
-            for (const coordinate of coordinates) {
-                tb.loadObj(options, (model) => {
-                model.setCoords([coordinate.lng, coordinate.lat]);
-                model.setRotation({ x: 0, y: 0, z: coordinate.rot });
-                tb.add(model);
-            });
-            }
+            const options = getModelOptions();
+            addMultipleModel(options, 501)
         },
-
         render: function () {
             tb.update();
         }
+      });
     });
-});
-
-  // window.tb = new Threebox(map, map.getCanvas().getContext("webgl"), {
-  //   realSunlight: true
-  // });
-
-    const modelOrigin = [-87.701056, 34.794222];
-    const modelAltitude = 0;
-    const modelRotate = [Math.PI / 2, 0, 0];
-
-    const modelAsMercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat(
-      modelOrigin,
-      modelAltitude
-    );
-
-    const modelTransform = {
-      translateX: modelAsMercatorCoordinate.x,
-      translateY: modelAsMercatorCoordinate.y,
-      translateZ: modelAsMercatorCoordinate.z,
-      rotateX: modelRotate[0],
-      rotateY: modelRotate[1],
-      rotateZ: modelRotate[2],
-      scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits() / 50,
-    };
-
-    // function makeScene() {
-    //   const scene = new THREE.Scene();
-
-    //   const directionalLight = new THREE.DirectionalLight(0xffffff);
-    //     directionalLight.position.set(0, 70, 100).normalize();
-    //     scene.add(directionalLight);
-
-    //     const directionalLight2 = new THREE.DirectionalLight(0xffffff);
-    //     directionalLight2.position.set(0, -70, 100).normalize();
-    //     scene.add(directionalLight2);
-
-    //     const ambientLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
-    //     scene.add(ambientLight);
-
-    //     return scene
-    // }
-
-    // const customLayer = {
-    //   id: '3d-model',
-    //   type: 'custom',
-    //   renderingMode: '3d',
-    //   onAdd: function (map, gl) {
-    //     this.camera = new THREE.Camera();
-    //     this.scene = makeScene();
-
-    //     function getSpriteMatrix(position, altitude, center) {
-    //       // const model = 'https://mapbox-houses.onrender.com/houses/house1/scene.gltf'
-    //       const scale = 1/50
-    //       const rotate = [ 0 , 0, 0 ].map(deg => (Math.PI / 180) * deg)
-    //       const rotationX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), rotate[0]);
-    //       const rotationY = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0, 1, 0), rotate[1]);
-    //       const rotationZ = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0, 0, 1), rotate[2]);
-        
-    //       const coord = mapboxgl.MercatorCoordinate.fromLngLat(position, altitude);
-    //       return new THREE.Matrix4()
-    //         .makeTranslation(coord.x - center.x, coord.y - center.y, coord.z - center.z)
-    //         .scale(new THREE.Vector3(scale, -scale, scale))
-    //         .multiply(rotationX)
-    //         .multiply(rotationY)
-    //         .multiply(rotationZ);
-    //     }
-
-
-    //     const coodinates = [{lng: -87.701176, lat: 34.794222}, {lng: -87.701056, lat: 34.794222}] 
-    //     const modelCollection = coodinates.map(c => {
-    //       console.log('generating model scene')
-    //       const scene = this.scene.clone()
-    //     });
-
-    //     const loader = new GLTFLoader();
-    //     loader.load(
-    //       'https://mapbox-houses.onrender.com/houses/house1/scene.gltf',
-    //       (gltf) => {
-    //         this.scene.add(gltf.scene);
-    //       }
-    //     );
-    //     for(const scene of modelCollection){
-    //       console.log("adding model scene")
-    //       this.scene.add(scene);
-    //     }
-
-    //     this.map = map;
-
-    //     this.renderer = new THREE.WebGLRenderer({
-    //       canvas: map.getCanvas(),
-    //       context: gl,
-    //       antialias: true,
-    //     });
-
-    //     this.renderer.autoClear = false;
-    //   },
-    //   render: function (gl, matrix) {
-    //     const rotationX = new THREE.Matrix4().makeRotationAxis(
-    //       new THREE.Vector3(1, 0, 0),
-    //       modelTransform.rotateX
-    //     );
-    //     const rotationY = new THREE.Matrix4().makeRotationAxis(
-    //       new THREE.Vector3(0, 1, 0),
-    //       modelTransform.rotateY
-    //     );
-    //     const rotationZ = new THREE.Matrix4().makeRotationAxis(
-    //       new THREE.Vector3(0, 0, 1),
-    //       modelTransform.rotateZ
-    //     );
-
-    //     const m = new THREE.Matrix4().fromArray(matrix);
-    //     const l = new THREE.Matrix4()
-    //       .makeTranslation(
-    //         modelTransform.translateX,
-    //         modelTransform.translateY,
-    //         modelTransform.translateZ
-    //       )
-    //       .scale(
-    //         new THREE.Vector3(
-    //           modelTransform.scale,
-    //           -modelTransform.scale,
-    //           modelTransform.scale
-    //         )
-    //       )
-    //       .multiply(rotationX)
-    //       .multiply(rotationY)
-    //       .multiply(rotationZ);
-
-    //     this.camera.projectionMatrix = m.multiply(l);
-    //     this.renderer.resetState();
-    //     this.renderer.render(this.scene, this.camera);
-    //     this.map.triggerRepaint();
-    //   },
-    // };
-
-    // map.on('style.load', () => {
-    //   map.addLayer(customLayer, 'waterway-label');
-    // });
 
     return () => map.remove();
   }, []);
