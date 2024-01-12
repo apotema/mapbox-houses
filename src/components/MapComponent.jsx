@@ -65,6 +65,61 @@ export function MapComponent() {
         this.camera = new THREE.Camera();
         this.scene = makeScene();
 
+        function getSpriteMatrix(position, altitude, center) {
+          // const model = 'https://mapbox-houses.onrender.com/houses/house1/scene.gltf'
+          const scale = 1/50
+          const rotate = [ 0 , 0, 0 ].map(deg => (Math.PI / 180) * deg)
+          const rotationX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), rotate[0]);
+          const rotationY = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0, 1, 0), rotate[1]);
+          const rotationZ = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(0, 0, 1), rotate[2]);
+        
+          const coord = mapboxgl.MercatorCoordinate.fromLngLat(position, altitude);
+          return new THREE.Matrix4()
+            .makeTranslation(coord.x - center.x, coord.y - center.y, coord.z - center.z)
+            .scale(new THREE.Vector3(scale, -scale, scale))
+            .multiply(rotationX)
+            .multiply(rotationY)
+            .multiply(rotationZ);
+        }
+
+
+        const coodinates = [{lng: -87.701176, lat: 34.794222}, {lng: -87.701056, lat: 34.794222}] 
+        const modelCollection = coodinates.map(c => {
+          console.log('generating model scene')
+          const scene = this.scene.clone()
+          // const model = new Promise<THREE.Scene>((resolve, reject) => {
+          // const loader = new GLTFLoader();
+          // loader.load(
+          //   'https://mapbox-houses.onrender.com/houses/house1/scene.gltf',
+          //   gltf => {
+          //     resolve(gltf.scene);
+          //   },
+          //   () => {
+          //     // progress is being made; bytes loaded = xhr.loaded / xhr.total
+          //   },
+          //   e => {
+          //     const xhr = e.target;
+          //     const message = `Unable to load ${options.gltfPath}: ${xhr.status} ${xhr.statusText}`;
+          //     console.error(message); // tslint:disable-line
+          //     reject(message);
+          //   },
+          // );
+        });
+        //   scene.applyMatrix(
+        //     getSpriteMatrix(
+        //         {
+        //           lng: c.lng,
+        //           // lng: -87.701176,
+        //           // lat: 34.794222,
+        //           lat: c.lat,
+        //         },
+        //         0,
+        //       this.center,
+        //     ),
+        //   );
+        //   // return model;
+        // }); 
+
         const loader = new GLTFLoader();
         loader.load(
           'https://mapbox-houses.onrender.com/houses/house1/scene.gltf',
@@ -72,7 +127,12 @@ export function MapComponent() {
             this.scene.add(gltf.scene);
           }
         );
-        this.map = map;      
+        for(const scene of modelCollection){
+          console.log("adding model scene")
+          this.scene.add(scene);
+        }
+
+        this.map = map;
 
         this.renderer = new THREE.WebGLRenderer({
           canvas: map.getCanvas(),
