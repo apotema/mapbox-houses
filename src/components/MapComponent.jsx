@@ -2,13 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Threebox } from 'threebox-plugin';
 import "threebox-plugin/dist/threebox.css";
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Carousel from 'react-bootstrap/Carousel';
-import Row from 'react-bootstrap/Row';
-
-import Col from 'react-bootstrap/Col';
-
+import { Button, Modal, Carousel} from 'react-bootstrap';
 import houseImage1 from '../images/house1.jpg'
 import houseImage2 from '../images/house2.jpg'
 import houseImage3 from '../images/house3.jpg'
@@ -53,8 +47,7 @@ function makeMap(container) {
     style: 'mapbox://styles/mapbox/outdoors-v12',
     center: { lng: longitude, lat: latitude },
     zoom: 15.5,
-    pitch: 0,
-    //pitch: 60,
+    pitch: 20,
     bearing: 0,
     antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 })
@@ -108,6 +101,8 @@ export function MapComponent() {
 
   function callModal(e){
     const coordinates = e.features[0].geometry.coordinates[0][0].slice();
+    const slotId = e.features[0].properties.slotId
+    console.log(slotId)
     handleShowMapModal()
   }
 
@@ -124,21 +119,57 @@ export function MapComponent() {
                 {
                     'type': 'Feature',
                     'properties': {
-                        'id': 'bla1',
+                        'slotId': 'slot1',
                     },
                     'geometry': {
                         'type': 'Polygon',
                         'coordinates': [
                     [
-                        [-87.698916, 34.796622],
-                        [-87.698116, 34.796622],
+                        [-87.698416, 34.796822],
+                        [-87.698116, 34.796822],
                         [-87.698116, 34.797002],
-                        [-87.698916, 34.797002],
-                        [-87.698916, 34.796622]
+                        [-87.698416, 34.797002],
+                        [-87.698416, 34.796822]
                     ]
                 ]
                     }
                 },
+                {
+                  'type': 'Feature',
+                  'properties': {
+                      'slotId': 'slot2',
+                  },
+                  'geometry': {
+                      'type': 'Polygon',
+                      'coordinates': [
+                  [
+                    [-87.698916, 34.796822],
+                    [-87.698616, 34.796822],
+                    [-87.698616, 34.797002],
+                    [-87.698916, 34.797002],
+                    [-87.698916, 34.796822]
+                  ]
+              ]
+                  }
+              },
+                {
+                  'type': 'Feature',
+                  'properties': {
+                      'slotId': 'slot3',
+                  },
+                  'geometry': {
+                      'type': 'Polygon',
+                      'coordinates': [
+                  [
+                    [-87.699416, 34.796822],
+                    [-87.699116, 34.796822],
+                    [-87.699116, 34.797002],
+                    [-87.699416, 34.797002],
+                    [-87.699416, 34.796822]
+                  ]
+              ]
+                  }
+              },
             ]
         }
       });
@@ -188,6 +219,20 @@ export function MapComponent() {
           <Modal.Title>Choose your house</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+        <style>
+          {`
+            /* Custom styles for darker carousel arrows */
+            .carousel-control-prev-icon,
+            .carousel-control-next-icon {
+              filter: brightness(50%); /* Adjust the brightness as needed */
+            }
+
+            .carousel-control-prev,
+            .carousel-control-next {
+              opacity: 1;
+            }
+          `}
+        </style>
         <Carousel>
           <Carousel.Item>
           <img className="d-block w-50 mx-auto" src={houseImage1} alt="House Image 1" />
@@ -211,7 +256,7 @@ export function MapComponent() {
             Close
           </Button>
           <Button variant="primary" onClick={handleCloseMapModal}>
-            Save Changes
+            Choose this one!
           </Button>
         </Modal.Footer>
       </Modal>
