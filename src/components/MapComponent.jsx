@@ -4,12 +4,16 @@ import { Threebox } from 'threebox-plugin';
 import "threebox-plugin/dist/threebox.css";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import Image from 'react-bootstrap/Modal';
+import Carousel from 'react-bootstrap/Carousel';
+import Row from 'react-bootstrap/Row';
+
+import Col from 'react-bootstrap/Col';
+
 import houseImage1 from '../images/house1.jpg'
-// import houseImage2 from '../images/house2.jpg'
-// import houseImage3 from '../images/house3.jpg'
-// import houseImage4 from '../images/house4.jpg'
-// import houseImage5 from '../images/house5.jpg'
+import houseImage2 from '../images/house2.jpg'
+import houseImage3 from '../images/house3.jpg'
+import houseImage4 from '../images/house4.jpg'
+import houseImage5 from '../images/house5.jpg'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -184,8 +188,23 @@ export function MapComponent() {
           <Modal.Title>Choose your house</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <img src={houseImage1} alt="House Image" style={{ width: '50%', height: 'auto' }} />
-          
+        <Carousel>
+          <Carousel.Item>
+          <img className="d-block w-50 mx-auto" src={houseImage1} alt="House Image 1" />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img className="d-block w-50 mx-auto" src={houseImage2} alt="House Image 2" />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img className="d-block w-50 mx-auto" src={houseImage3} alt="House Image 3" />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img className="d-block w-50 mx-auto" src={houseImage4} alt="House Image 4" />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img className="d-block w-50 mx-auto" src={houseImage5} alt="House Image 5" />
+          </Carousel.Item>
+        </Carousel>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseMapModal}>
