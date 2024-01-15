@@ -1,7 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Threebox } from 'threebox-plugin';
 import "threebox-plugin/dist/threebox.css";
+import { Button, Modal, Carousel} from 'react-bootstrap';
+import houseImage1 from '../images/house1.jpg'
+import houseImage2 from '../images/house2.jpg'
+import houseImage3 from '../images/house3.jpg'
+import houseImage4 from '../images/house4.jpg'
+import houseImage5 from '../images/house5.jpg'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -25,7 +31,7 @@ function getCoordinates(limit) {
               lng = lngOrigin + 0.000299
               lat = lat - 0.0001
               rot = 180
-          } 
+          }
       }
   }
   return coordList
@@ -33,20 +39,20 @@ function getCoordinates(limit) {
 
 function makeMap(container) {
   const longitude = -87.701176;
-    const latitude = 34.794222;
+  const latitude = 34.794222;
 
-    var map = new mapboxgl.Map({
-      container: container.current,
-      // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
-      style: 'mapbox://styles/mapbox/outdoors-v12',
-      center: { lng: longitude, lat: latitude },
-      zoom: 15.5,
-      pitch: 60,
-      bearing: 0,
-      antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
-  })
+  var map = new mapboxgl.Map({
+    container: container.current,
+    // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+    style: 'mapbox://styles/mapbox/outdoors-v12',
+    center: { lng: longitude, lat: latitude },
+    zoom: 15.5,
+    pitch: 20,
+    bearing: 0,
+    antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
+})
 
-    return map
+  return map
 }
 
 function makeThreeBox(map){
@@ -89,12 +95,97 @@ function getModelOptions(){
 
 export function MapComponent() {
   const mapContainer = useRef(null);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const handleCloseMapModal = () => setShowMapModal(false);
+  const handleShowMapModal = () => setShowMapModal(true);
+
+  function callModal(e){
+    const coordinates = e.features[0].geometry.coordinates[0][0].slice();
+    const slotId = e.features[0].properties.slotId
+    console.log(slotId)
+    handleShowMapModal()
+  }
 
   useEffect(() => {
     const map = makeMap(mapContainer)
     const tb = makeThreeBox(map);
 
     map.on('style.load', () => {
+      map.addSource('slot', {
+        'type': 'geojson',
+        'data': {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        'slotId': 'slot1',
+                    },
+                    'geometry': {
+                        'type': 'Polygon',
+                        'coordinates': [
+                    [
+                        [-87.698416, 34.796822],
+                        [-87.698116, 34.796822],
+                        [-87.698116, 34.797002],
+                        [-87.698416, 34.797002],
+                        [-87.698416, 34.796822]
+                    ]
+                ]
+                    }
+                },
+                {
+                  'type': 'Feature',
+                  'properties': {
+                      'slotId': 'slot2',
+                  },
+                  'geometry': {
+                      'type': 'Polygon',
+                      'coordinates': [
+                  [
+                    [-87.698916, 34.796822],
+                    [-87.698616, 34.796822],
+                    [-87.698616, 34.797002],
+                    [-87.698916, 34.797002],
+                    [-87.698916, 34.796822]
+                  ]
+              ]
+                  }
+              },
+                {
+                  'type': 'Feature',
+                  'properties': {
+                      'slotId': 'slot3',
+                  },
+                  'geometry': {
+                      'type': 'Polygon',
+                      'coordinates': [
+                  [
+                    [-87.699416, 34.796822],
+                    [-87.699116, 34.796822],
+                    [-87.699116, 34.797002],
+                    [-87.699416, 34.797002],
+                    [-87.699416, 34.796822]
+                  ]
+              ]
+                  }
+              },
+            ]
+        }
+      });
+      map.addLayer({
+        id: 'slot',
+        type: 'fill',
+        source: 'slot', // reference the data source
+        layout: {},
+        paint: {
+            'fill-color': '#7C3030', // blue color fill
+            'fill-opacity': 0.5
+        },
+        render: function () {
+          tb.update();
+      }
+      });
       map.addLayer({
         id: 'custom-threebox-model',
         type: 'custom',
@@ -107,10 +198,70 @@ export function MapComponent() {
             tb.update();
         }
       });
+      map.on('click', 'slot', (e) => {
+        callModal(e)
+      });
+      map.on('mouseenter', 'slot', (e) => {      
+          map.getCanvas().style.cursor = 'pointer'
+      });
+      map.on('mouseleave', 'slot', () => {
+          map.getCanvas().style.cursor = '';
+      });
     });
 
     return () => map.remove();
   }, []);
 
-  return <div ref={mapContainer} style={{ height: '100vh' }} />;
+  return(
+    <>
+      <Modal show={showMapModal} onHide={handleCloseMapModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Choose your house</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+        <style>
+          {`
+            /* Custom styles for darker carousel arrows */
+            .carousel-control-prev-icon,
+            .carousel-control-next-icon {
+              filter: brightness(50%); /* Adjust the brightness as needed */
+            }
+
+            .carousel-control-prev,
+            .carousel-control-next {
+              opacity: 1;
+            }
+          `}
+        </style>
+        <Carousel>
+          <Carousel.Item>
+          <img className="d-block w-50 mx-auto" src={houseImage1} alt="House Image 1" />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img className="d-block w-50 mx-auto" src={houseImage2} alt="House Image 2" />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img className="d-block w-50 mx-auto" src={houseImage3} alt="House Image 3" />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img className="d-block w-50 mx-auto" src={houseImage4} alt="House Image 4" />
+          </Carousel.Item>
+          <Carousel.Item>
+            <img className="d-block w-50 mx-auto" src={houseImage5} alt="House Image 5" />
+          </Carousel.Item>
+        </Carousel>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseMapModal}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleCloseMapModal}>
+            Choose this one!
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <div ref={mapContainer} style={{ height: '100vh' }} />
+    </>
+  );
 }
