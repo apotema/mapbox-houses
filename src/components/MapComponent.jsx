@@ -4,6 +4,12 @@ import { Threebox } from 'threebox-plugin';
 import "threebox-plugin/dist/threebox.css";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Image from 'react-bootstrap/Modal';
+import houseImage1 from '../images/house1.jpg'
+// import houseImage2 from '../images/house2.jpg'
+// import houseImage3 from '../images/house3.jpg'
+// import houseImage4 from '../images/house4.jpg'
+// import houseImage5 from '../images/house5.jpg'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -98,8 +104,6 @@ export function MapComponent() {
 
   function callModal(e){
     const coordinates = e.features[0].geometry.coordinates[0][0].slice();
-    console.log('calling')
-    window.bla = 'entrou'
     handleShowMapModal()
   }
 
@@ -177,9 +181,12 @@ export function MapComponent() {
     <>
       <Modal show={showMapModal} onHide={handleCloseMapModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Modal heading</Modal.Title>
+          <Modal.Title>Choose your house</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+        <Modal.Body>
+        <img src={houseImage1} alt="House Image" style={{ width: '50%', height: 'auto' }} />
+          
+        </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseMapModal}>
             Close
