@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Threebox } from 'threebox-plugin';
 import "threebox-plugin/dist/threebox.css";
@@ -25,7 +25,7 @@ function getCoordinates(limit) {
               lng = lngOrigin + 0.000299
               lat = lat - 0.0001
               rot = 180
-          } 
+          }
       }
   }
   return coordList
@@ -33,20 +33,21 @@ function getCoordinates(limit) {
 
 function makeMap(container) {
   const longitude = -87.701176;
-    const latitude = 34.794222;
+  const latitude = 34.794222;
 
-    var map = new mapboxgl.Map({
-      container: container.current,
-      // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
-      style: 'mapbox://styles/mapbox/outdoors-v12',
-      center: { lng: longitude, lat: latitude },
-      zoom: 15.5,
-      pitch: 60,
-      bearing: 0,
-      antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
-  })
+  var map = new mapboxgl.Map({
+    container: container.current,
+    // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+    style: 'mapbox://styles/mapbox/outdoors-v12',
+    center: { lng: longitude, lat: latitude },
+    zoom: 15.5,
+    pitch: 0,
+    //pitch: 60,
+    bearing: 0,
+    antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
+})
 
-    return map
+  return map
 }
 
 function makeThreeBox(map){
@@ -95,6 +96,53 @@ export function MapComponent() {
     const tb = makeThreeBox(map);
 
     map.on('style.load', () => {
+      map.addSource('slot', {
+        'type': 'geojson',
+        'data': {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        'id': 'bla1',
+                        'description':
+                            '<strong>Choose your house</strong><p>Choose your house <a href="http://www.google.com" target="_blank" title="Opens in a new window">Add my house in here</a></p>',
+                    },
+                    'geometry': {
+                        'type': 'Polygon',
+                        'coordinates': [
+                    [
+                        [-87.698916, 34.796622],
+                        [-87.698116, 34.796622],
+                        [-87.698116, 34.797002],
+                        [-87.698916, 34.797002],
+                        [-87.698916, 34.796622]
+                    ]
+                ]
+                    }
+                },
+            ]
+        }
+    });
+      map.addLayer({
+        id: 'slot',
+        type: 'fill',
+        source: 'slot', // reference the data source
+        layout: {},
+        paint: {
+            'fill-color': '#7C3030', // blue color fill
+            'fill-opacity': 0.5
+        },
+        render: function () {
+          tb.update();
+      },
+      onMouseEnter: function(){
+        console.log('yahooooo')
+      },
+      onClick: function(){
+        console.log('yahooooo')
+      }
+  });
       map.addLayer({
         id: 'custom-threebox-model',
         type: 'custom',
@@ -107,6 +155,41 @@ export function MapComponent() {
             tb.update();
         }
       });
+    //   map.on('click', 'slot', (e) => {
+    //     // Copy coordinates array.
+    //     console.log(e.features[0].geometry.coordinates[0][0].slice())
+    //     const coordinates = e.features[0].geometry.coordinates[0][0].slice();
+    //     const description = e.features[0].properties.description;
+
+    //     // Ensure that if the map is zoomed out such that multiple
+    //     // copies of the feature are visible, the popup appears
+    //     // over the copy being pointed to.
+    //     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    //         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    //     }
+
+    //     new mapboxgl.Popup()
+    //         .setLngLat(coordinates)
+    //         .setHTML(description)
+    //         .addTo(map);
+    // });
+
+    // Change the cursor to a pointer when the mouse is over the places layer.
+    map.on('mouseenter', 'slot', (e) => {
+        map.getCanvas().style.cursor = 'pointer'
+        e.target.style.cursor = 'pointer';
+        console.log(`type ${e.type}`)
+        console.log(e)
+    });
+
+    // Change it back to a pointer when it leaves.
+    map.on('mouseleave', 'slot', () => {
+      console.log("mouse leave")
+        // map.getCanvas().style.cursor = '';
+        console.log(map.getCanvas().style.cursor)
+
+
+    });
     });
 
     return () => map.remove();
