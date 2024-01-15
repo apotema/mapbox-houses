@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Threebox } from 'threebox-plugin';
 import "threebox-plugin/dist/threebox.css";
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -90,6 +92,16 @@ function getModelOptions(){
 
 export function MapComponent() {
   const mapContainer = useRef(null);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const handleCloseMapModal = () => setShowMapModal(false);
+  const handleShowMapModal = () => setShowMapModal(true);
+
+  function callModal(e){
+    const coordinates = e.features[0].geometry.coordinates[0][0].slice();
+    console.log('calling')
+    window.bla = 'entrou'
+    handleShowMapModal()
+  }
 
   useEffect(() => {
     const map = makeMap(mapContainer)
@@ -105,8 +117,6 @@ export function MapComponent() {
                     'type': 'Feature',
                     'properties': {
                         'id': 'bla1',
-                        'description':
-                            '<strong>Choose your house</strong><p>Choose your house <a href="http://www.google.com" target="_blank" title="Opens in a new window">Add my house in here</a></p>',
                     },
                     'geometry': {
                         'type': 'Polygon',
@@ -123,7 +133,7 @@ export function MapComponent() {
                 },
             ]
         }
-    });
+      });
       map.addLayer({
         id: 'slot',
         type: 'fill',
@@ -135,14 +145,8 @@ export function MapComponent() {
         },
         render: function () {
           tb.update();
-      },
-      onMouseEnter: function(){
-        console.log('yahooooo')
-      },
-      onClick: function(){
-        console.log('yahooooo')
       }
-  });
+      });
       map.addLayer({
         id: 'custom-threebox-model',
         type: 'custom',
@@ -155,45 +159,38 @@ export function MapComponent() {
             tb.update();
         }
       });
-    //   map.on('click', 'slot', (e) => {
-    //     // Copy coordinates array.
-    //     console.log(e.features[0].geometry.coordinates[0][0].slice())
-    //     const coordinates = e.features[0].geometry.coordinates[0][0].slice();
-    //     const description = e.features[0].properties.description;
-
-    //     // Ensure that if the map is zoomed out such that multiple
-    //     // copies of the feature are visible, the popup appears
-    //     // over the copy being pointed to.
-    //     while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-    //         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-    //     }
-
-    //     new mapboxgl.Popup()
-    //         .setLngLat(coordinates)
-    //         .setHTML(description)
-    //         .addTo(map);
-    // });
-
-    // Change the cursor to a pointer when the mouse is over the places layer.
-    map.on('mouseenter', 'slot', (e) => {
-        map.getCanvas().style.cursor = 'pointer'
-        e.target.style.cursor = 'pointer';
-        console.log(`type ${e.type}`)
-        console.log(e)
-    });
-
-    // Change it back to a pointer when it leaves.
-    map.on('mouseleave', 'slot', () => {
-      console.log("mouse leave")
-        // map.getCanvas().style.cursor = '';
-        console.log(map.getCanvas().style.cursor)
-
-
-    });
+      map.on('click', 'slot', (e) => {
+        callModal(e)
+      });
+      map.on('mouseenter', 'slot', (e) => {      
+          map.getCanvas().style.cursor = 'pointer'
+      });
+      map.on('mouseleave', 'slot', () => {
+          map.getCanvas().style.cursor = '';
+      });
     });
 
     return () => map.remove();
   }, []);
 
-  return <div ref={mapContainer} style={{ height: '100vh' }} />;
+  return(
+    <>
+      <Modal show={showMapModal} onHide={handleCloseMapModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Modal heading</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseMapModal}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleCloseMapModal}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <div ref={mapContainer} style={{ height: '100vh' }} />
+    </>
+  );
 }
