@@ -10,7 +10,6 @@ import houseImage4 from '../images/house4.jpg'
 import houseImage5 from '../images/house5.jpg'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
-
 function getCoordinates(limit) {
   var coordList = []
   var lngOrigin = -87.69956
@@ -65,9 +64,7 @@ function makeThreeBox(map){
   ))
 }
 
-function addMultipleModel(modelOptions, quantity){
-  const coordinatesList = getCoordinates(quantity)
-
+function addMultipleModel(modelOptions, coordinatesList){
   for (const modelCoordinates of coordinatesList) {
     addSingleModel(modelOptions, modelCoordinates)
   }
@@ -98,15 +95,30 @@ export function MapComponent() {
   const [showMapModal, setShowMapModal] = useState(false);
   const handleCloseMapModal = () => setShowMapModal(false);
   const handleShowMapModal = () => setShowMapModal(true);
+  const handleClick = () => addHouseOnSlot();
+  const [coordinatesList, setCoordinatesList] = useState(getCoordinates(501))
+
+  console.log('COMPONENT UHU')
+  console.log(coordinatesList)
 
   function callModal(e){
     const coordinates = e.features[0].geometry.coordinates[0][0].slice();
     const slotId = e.features[0].properties.slotId
-    console.log(slotId)
+    console.log(slotId + coordinates)
     handleShowMapModal()
   }
 
+  function addHouseOnSlot(){
+    console.log(coordinatesList)
+    const newHouseCoordinates = {lng: -87.69941568374634, lat: 34.79682208320132, rot: 0}
+    console.log(coordinatesList)
+    setCoordinatesList([...coordinatesList, newHouseCoordinates])
+    console.log(coordinatesList)
+    setShowMapModal(false)
+  }
+
   useEffect(() => {
+    console.log('EFFECt')
     const map = makeMap(mapContainer)
     const tb = makeThreeBox(map);
 
@@ -192,7 +204,7 @@ export function MapComponent() {
         renderingMode: '3d',
         onAdd: function () {
             const options = getModelOptions();
-            addMultipleModel(options, 501)
+            addMultipleModel(options, coordinatesList)
         },
         render: function () {
             tb.update();
@@ -210,7 +222,7 @@ export function MapComponent() {
     });
 
     return () => map.remove();
-  }, []);
+  }, [coordinatesList]);
 
   return(
     <>
@@ -255,7 +267,7 @@ export function MapComponent() {
           <Button variant="secondary" onClick={handleCloseMapModal}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleCloseMapModal}>
+          <Button variant="primary" onClick={handleClick}>
             Choose this one!
           </Button>
         </Modal.Footer>
