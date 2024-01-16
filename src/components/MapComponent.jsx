@@ -222,7 +222,7 @@ export function MapComponent() {
     <>
       <Modal show={showMapModal} onHide={handleCloseMapModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Choose your house</Modal.Title>
+          <Modal.Title>Choose your house to add on {selectedSlot.id}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
         <style>
