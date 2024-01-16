@@ -97,28 +97,22 @@ export function MapComponent() {
   const handleShowMapModal = () => setShowMapModal(true);
   const handleClick = () => addHouseOnSlot();
   const [coordinatesList, setCoordinatesList] = useState(getCoordinates(501))
-
-  console.log('COMPONENT UHU')
-  console.log(coordinatesList)
+  const [selectedSlot, setselectedSlot] = useState({})
 
   function callModal(e){
     const coordinates = e.features[0].geometry.coordinates[0][0].slice();
     const slotId = e.features[0].properties.slotId
-    console.log(slotId + coordinates)
+    setselectedSlot({id: slotId, properties: {lng: coordinates[0], lat: coordinates[1], rot: 0}})
     handleShowMapModal()
   }
 
   function addHouseOnSlot(){
-    console.log(coordinatesList)
-    const newHouseCoordinates = {lng: -87.69941568374634, lat: 34.79682208320132, rot: 0}
-    console.log(coordinatesList)
+    const newHouseCoordinates = selectedSlot.properties
     setCoordinatesList([...coordinatesList, newHouseCoordinates])
-    console.log(coordinatesList)
     setShowMapModal(false)
   }
 
   useEffect(() => {
-    console.log('EFFECt')
     const map = makeMap(mapContainer)
     const tb = makeThreeBox(map);
 
