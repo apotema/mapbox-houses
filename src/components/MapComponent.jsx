@@ -10,7 +10,6 @@ import houseImage4 from '../images/house4.jpg'
 import houseImage5 from '../images/house5.jpg'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
-
 function getCoordinates(limit) {
   var coordList = []
   var lngOrigin = -87.69956
@@ -65,9 +64,7 @@ function makeThreeBox(map){
   ))
 }
 
-function addMultipleModel(modelOptions, quantity){
-  const coordinatesList = getCoordinates(quantity)
-
+function addMultipleModel(modelOptions, coordinatesList){
   for (const modelCoordinates of coordinatesList) {
     addSingleModel(modelOptions, modelCoordinates)
   }
@@ -98,12 +95,21 @@ export function MapComponent() {
   const [showMapModal, setShowMapModal] = useState(false);
   const handleCloseMapModal = () => setShowMapModal(false);
   const handleShowMapModal = () => setShowMapModal(true);
+  const handleClick = () => addHouseOnSlot();
+  const [coordinatesList, setCoordinatesList] = useState(getCoordinates(501))
+  const [selectedSlot, setselectedSlot] = useState({})
 
   function callModal(e){
     const coordinates = e.features[0].geometry.coordinates[0][0].slice();
     const slotId = e.features[0].properties.slotId
-    console.log(slotId)
+    setselectedSlot({id: slotId, properties: {lng: coordinates[0], lat: coordinates[1], rot: 0}})
     handleShowMapModal()
+  }
+
+  function addHouseOnSlot(){
+    const newHouseCoordinates = selectedSlot.properties
+    setCoordinatesList([...coordinatesList, newHouseCoordinates])
+    setShowMapModal(false)
   }
 
   useEffect(() => {
@@ -192,7 +198,7 @@ export function MapComponent() {
         renderingMode: '3d',
         onAdd: function () {
             const options = getModelOptions();
-            addMultipleModel(options, 501)
+            addMultipleModel(options, coordinatesList)
         },
         render: function () {
             tb.update();
@@ -210,13 +216,13 @@ export function MapComponent() {
     });
 
     return () => map.remove();
-  }, []);
+  }, [coordinatesList]);
 
   return(
     <>
       <Modal show={showMapModal} onHide={handleCloseMapModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Choose your house</Modal.Title>
+          <Modal.Title>Choose your house to add on {selectedSlot.id}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
         <style>
@@ -255,7 +261,7 @@ export function MapComponent() {
           <Button variant="secondary" onClick={handleCloseMapModal}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleCloseMapModal}>
+          <Button variant="primary" onClick={handleClick}>
             Choose this one!
           </Button>
         </Modal.Footer>
