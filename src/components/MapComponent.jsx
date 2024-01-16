@@ -3,8 +3,8 @@ import mapboxgl from 'mapbox-gl';
 import { Threebox } from 'threebox-plugin';
 import "threebox-plugin/dist/threebox.css";
 import { Button, Modal, Carousel} from 'react-bootstrap';
-import houseImage1 from '../images/house1.jpg'
-import houseImage2 from '../images/house2.jpg'
+import houseImage1 from '../images/house_1.png'
+import houseImage2 from '../images/house_2.png'
 import houseImage3 from '../images/house3.jpg'
 import houseImage4 from '../images/house4.jpg'
 import houseImage5 from '../images/house5.jpg'
@@ -78,16 +78,27 @@ function addSingleModel(modelOptions, coordinates){
   })
 }
 
-function getModelOptions(){
-  const scale= 1/100
-  const options = {
+function getModelOptions(optionHouse = 0){
+
+  const options = [{
+    id: 0,
     obj: 'https://mapbox-houses.onrender.com/houses/house1/scene.gltf',
     type: 'gltf',
-    scale: { x: scale, y: scale, z: scale },
+    scale: { x: 1/100, y: 1/100, z: 1/100 },
     units: 'meters',
     rotation: { x: 90, y: -90, z: 0 }
-}
-  return options
+  },
+  {
+    id: 1,
+    obj: 'https://mapbox-houses.onrender.com/houses/house3/scene.gltf',
+    type: 'gltf',
+    scale: { x: 1/5, y: 1/5, z: 1/5 },
+    units: 'meters',
+    rotation: { x: 90, y: -90, z: 0 }
+  }]
+    const seletectOption =  options.find(option => option.id === optionHouse)
+    console.log(`Option ${seletectOption}`)
+    return seletectOption
 }
 
 export function MapComponent() {
@@ -97,6 +108,7 @@ export function MapComponent() {
   const handleShowMapModal = () => setShowMapModal(true);
   const handleClick = () => addHouseOnSlot();
   const [coordinatesList, setCoordinatesList] = useState(getCoordinates(501))
+  const [newHouseCoordinatesList, setNewHouseCoordinatesList] = useState([])
   const [selectedSlot, setselectedSlot] = useState({})
 
   function callModal(e){
@@ -108,7 +120,16 @@ export function MapComponent() {
 
   function addHouseOnSlot(){
     const newHouseCoordinates = selectedSlot.properties
-    setCoordinatesList([...coordinatesList, newHouseCoordinates])
+    const activeSlide = document.querySelector('.carousel-item.active');
+    console.log(activeSlide)
+    const activeImage = activeSlide.querySelector('img');
+    const imageId = activeImage.id;
+    if (imageId == 0){
+      setCoordinatesList([...coordinatesList, newHouseCoordinates])
+    } else {
+      setNewHouseCoordinatesList([...newHouseCoordinatesList, newHouseCoordinates])
+    }
+
     setShowMapModal(false)
   }
 
@@ -197,8 +218,10 @@ export function MapComponent() {
         type: 'custom',
         renderingMode: '3d',
         onAdd: function () {
-            const options = getModelOptions();
-            addMultipleModel(options, coordinatesList)
+              const options = getModelOptions(0);
+              addMultipleModel(options, coordinatesList)
+              const newHouseOption = getModelOptions(1);
+              addMultipleModel(newHouseOption, newHouseCoordinatesList)
         },
         render: function () {
             tb.update();
@@ -207,7 +230,7 @@ export function MapComponent() {
       map.on('click', 'slot', (e) => {
         callModal(e)
       });
-      map.on('mouseenter', 'slot', (e) => {      
+      map.on('mouseenter', 'slot', () => {
           map.getCanvas().style.cursor = 'pointer'
       });
       map.on('mouseleave', 'slot', () => {
@@ -216,7 +239,7 @@ export function MapComponent() {
     });
 
     return () => map.remove();
-  }, [coordinatesList]);
+  }, [coordinatesList, newHouseCoordinatesList]);
 
   return(
     <>
@@ -241,10 +264,10 @@ export function MapComponent() {
         </style>
         <Carousel>
           <Carousel.Item>
-          <img className="d-block w-50 mx-auto" src={houseImage1} alt="House Image 1" />
+          <img className="d-block w-50 mx-auto" src={houseImage1} alt="House Image 1" id='0'/>
           </Carousel.Item>
           <Carousel.Item>
-            <img className="d-block w-50 mx-auto" src={houseImage2} alt="House Image 2" />
+            <img className="d-block w-50 mx-auto" src={houseImage2} alt="House Image 2" id='1'/>
           </Carousel.Item>
           <Carousel.Item>
             <img className="d-block w-50 mx-auto" src={houseImage3} alt="House Image 3" />
